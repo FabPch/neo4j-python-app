@@ -11,6 +11,8 @@ class MovieDAO:
     def __init__(self, driver):
         self.driver = driver
 
+    
+    
     """
      This method should return a paginated list of movies ordered by the `sort`
      parameter and limited to the number passed as `limit`.  The `skip` variable should be
@@ -21,8 +23,21 @@ class MovieDAO:
     """
     # tag::all[]
     def all(self, sort, order, limit=6, skip=0, user_id=None):
+        def get_movies(tx, sort, order, limit, skip, user_id):
+            cypher = """
+            MATCH (m:Movie)
+            WHERE m.`{0}` IS NOT NULL
+            RETURN m {{ .* }} AS movie
+            ORDER BY m.`{0}` {1}
+            SKIP $skip
+            LIMIT $limit
+            """.format(sort, order)
+            
+            result = tx.run(cypher, limit=limit, skip=skip, user_id=user_id)
+            return [row.value('movie') for row in result]
         # TODO: Get list from movies from Neo4j
-        return popular
+        with self.driver.session() as session:
+            return session.execute_read(get_movies, sort, order, limit, skip, user_id)
     # end::all[]
 
     """
