@@ -31,10 +31,11 @@ def test_unique_constraint(app):
 
     def get_constraints(tx):
         return tx.run("""
-            CALL db.constraints()
-            YIELD name, description
-            WHERE description = 'CONSTRAINT ON ( user:User ) ASSERT (user.email) IS UNIQUE'
-            RETURN *
+            SHOW CONSTRAINTS
+            WHERE type = "UNIQUENESS" 
+                AND entityType = "NODE" 
+                AND "User" IN labelsOrTypes 
+                AND "email" IN properties
         """).single()
 
     with app.app_context():
