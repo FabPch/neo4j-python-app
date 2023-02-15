@@ -22,6 +22,29 @@ class RatingDAO:
         # TODO: Call the function within a write transaction
         # TODO: Return movie details along with a rating
 
+        def create_rating(tx, user_id, movie_id, rating):
+            return tx.run("""
+                MATCH (u:User {userId: $user_id})
+                MATCH (m:Movie {tmdbId: $movie_id})
+                MERGE (u)-[r:RATED]->(m)
+                SET r.rating = $rating,
+                    r.timestamp = timestamp()
+                RETURN m {
+                    .*
+                    , rating: r.rating
+                } AS movie
+            """, user_id=user_id, movie_id=movie_id, rating=rating).single()
+        
+        with self.driver.session() as session:
+            movie = session.execute_write(create_rating
+                                          , user_id=user_id
+                                          , movie_id=movie_id
+                                          , rating=rating)
+        
+        if movie is None:
+            raise NotFoundException()
+        
+        return movie['movie']
         return {
             **goodfellas,
             "rating": rating
