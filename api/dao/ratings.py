@@ -45,10 +45,6 @@ class RatingDAO:
             raise NotFoundException()
         
         return movie['movie']
-        return {
-            **goodfellas,
-            "rating": rating
-        }
     # end::add[]
 
 

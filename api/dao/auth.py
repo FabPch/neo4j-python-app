@@ -121,20 +121,6 @@ class AuthDAO:
 
         return payload
         # TODO: Implement Login functionality
-        if email == "graphacademy@neo4j.com" and plain_password == "letmein":
-            # Build a set of claims
-            payload = {
-                "userId": "00000000-0000-0000-0000-000000000000",
-                "email": email,
-                "name": "GraphAcademy User",
-            }
-
-            # Generate Token
-            payload["token"] = self._generate_token(payload)
-
-            return payload
-        else:
-            return False
     # end::authenticate[]
 
     """
