@@ -28,6 +28,21 @@ class GenreDAO:
         # TODO: Open a new session
         # TODO: Define a unit of work to Get a list of Genres
         # TODO: Execute within a Read Transaction
+        def get_all_genres(tx):
+            return tx.run("""
+                MATCH (g:GENRE)<-[:IN_GENRE]-(m:Movie)
+                WITH g, count(n) AS nbOfMovies
+                RETURN g {
+                    .name
+                    , movies: nbOfMovies
+                    , .poster
+                }
+            """)
+        
+        with self.driver.session() as session:
+            result = session.execute_read(get_all_genres)
+
+        genres = result['g']
 
         return genres
     # end::all[]
