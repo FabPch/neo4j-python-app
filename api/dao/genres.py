@@ -59,6 +59,20 @@ class GenreDAO:
         # TODO: Open a new session
         # TODO: Define a unit of work to find the genre by it's name
         # TODO: Execute within a Read Transaction
+        def get_genre(tx, name):
+            return tx.run("""
+                MATCH (g:GENRE)<-[:IN_GENRE]-(m:Movie)
+                WHERE g.name = $name
+                WITH g, count(n) AS nbOfMovies
+                RETURN g {
+                    .name
+                    , movies: nbOfMovies
+                    , .poster
+                }
+            """, name=name)
 
+        with self.driver.session() as session:
+            genres = session.execute_read(get_genre, name=name)
+            
         return [g for g in genres if g["name"] == name][0]
     # end::find[]
