@@ -40,6 +40,25 @@ class FavoriteDAO:
         # TODO: Define a new transaction function to create a HAS_FAVORITE relationship
         # TODO: Execute the transaction function within a Write Transaction
         # TODO: Return movie details and `favorite` property
+        def add_to_favorite(tx, user_id, movie_id):
+            result = tx.run("""
+                MATCH (u:User {userId: $userId})
+                MATCH (m:Movie {tmdbId: $movieId})
+                MERGE (u)-[r:HAS_FAVORITE]->(m)
+                ON CREATE SET u.createdAt = datetime()
+                RETURN m {
+                    .*
+                    , favorite: true
+                } AS movie
+            """, userId=user_id, movieId=movie_id).single()
+
+            if result is None:
+                raise NotFoundException()
+            
+            return result.get('movie')
+        
+        with self.driver.session() as session:
+            return session.execute_write(add_to_favorite, user_id=user_id, movie_id=movie_id)
 
         return {
             **goodfellas,
