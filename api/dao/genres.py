@@ -29,22 +29,23 @@ class GenreDAO:
         # TODO: Define a unit of work to Get a list of Genres
         # TODO: Execute within a Read Transaction
         def get_all_genres(tx):
-            return tx.run("""
+            results = tx.run("""
                 MATCH (g:GENRE)<-[:IN_GENRE]-(m:Movie)
+                WHERE m.imdbRating IS NOT NULL 
+                    AND m.poster IS NOT NULL
+                    AND g.name != '(no genres listed)'
                 WITH g, count(n) AS nbOfMovies
                 RETURN g {
-                    .name
+                    .*
                     , movies: nbOfMovies
                     , .poster
                 }
             """)
+
+            return [ record.value('g') for record in results ]
         
         with self.driver.session() as session:
-            result = session.execute_read(get_all_genres)
-
-        genres = result['g']
-
-        return genres
+            return session.execute_read(get_all_genres)
     # end::all[]
 
 
