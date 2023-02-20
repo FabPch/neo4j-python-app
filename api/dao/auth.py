@@ -63,13 +63,6 @@ class AuthDAO:
             return payload
         except ConstraintError as err:
             raise ValidationException(err.message, {'email': err.message})
-
-        # TODO: Handle unique constraint error
-        if email != "graphacademy@neo4j.com":
-            raise ValidationException(
-                f"An account already exists with the email address {email}",
-                {"email": "An account already exists with this email"}
-            )
     # end::register[]
 
     """
